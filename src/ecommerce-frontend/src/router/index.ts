@@ -52,6 +52,30 @@ const routes: Array<RouteRecordRaw> = [
     component: () =>
       import(/* webpackChunkName: "about" */ "../views/AboutView.vue"),
   },
+  {
+    path: "/review-and-pay",
+    name: "review-and-pay",
+    component: () =>
+      import(
+        /* webpackChunkName: "review-and-pay" */ "../views/ReviewAndPayView.vue"
+      ),
+  },
+  {
+    path: "/final-checkout",
+    name: "final-checkout",
+    component: () =>
+      import(
+        /* webpackChunkName: "final-checkout" */ "../views/FinalCheckoutView.vue"
+      ),
+  },
+  {
+    path: "/successful-checkout",
+    name: "successful-checkout",
+    component: () =>
+      import(
+        /* webpackChunkName: "successful-checkout" */ "../views/SuccessfulCheckoutView.vue"
+      ),
+  },
 ];
 
 const router = createRouter({

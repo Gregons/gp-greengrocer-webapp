@@ -32,10 +32,28 @@
             v-model="password"
             type="password"
             placeholder="Create a password"
-            minlength="6"
             required
           />
-          <small class="field-hint">At least 6 characters</small>
+          <ul class="password-requirements">
+            <li :class="passwordRules.hasMinLength ? 'req-met' : 'req-unmet'">
+              {{ passwordRules.hasMinLength ? "✓" : "✗" }} At least 6 characters
+            </li>
+            <li
+              :class="passwordRules.hasThreeNumbers ? 'req-met' : 'req-unmet'"
+            >
+              {{ passwordRules.hasThreeNumbers ? "✓" : "✗" }} At least 3 numbers
+            </li>
+            <li
+              :class="passwordRules.hasThreeUppercase ? 'req-met' : 'req-unmet'"
+            >
+              {{ passwordRules.hasThreeUppercase ? "✓" : "✗" }} At least 3
+              capital letters
+            </li>
+            <li :class="passwordRules.hasOneSymbol ? 'req-met' : 'req-unmet'">
+              {{ passwordRules.hasOneSymbol ? "✓" : "✗" }} At least 1 symbol
+              (e.g. !@#$)
+            </li>
+          </ul>
         </label>
 
         <label>
@@ -76,11 +94,34 @@ export default defineComponent({
       loading: false,
     };
   },
+  computed: {
+    passwordRules(): {
+      hasMinLength: boolean;
+      hasThreeNumbers: boolean;
+      hasThreeUppercase: boolean;
+      hasOneSymbol: boolean;
+    } {
+      const p = this.password;
+      return {
+        hasMinLength: p.length >= 6,
+        hasThreeNumbers: (p.match(/[0-9]/g) ?? []).length >= 3,
+        hasThreeUppercase: (p.match(/[A-Z]/g) ?? []).length >= 3,
+        hasOneSymbol: /[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/`~]/.test(p),
+      };
+    },
+  },
   methods: {
     async handleRegister() {
       this.errorMessage = "";
-      if (this.password.length < 6) {
-        this.errorMessage = "Password must be at least 6 characters";
+      const rules = this.passwordRules;
+      if (
+        !rules.hasMinLength ||
+        !rules.hasThreeNumbers ||
+        !rules.hasThreeUppercase ||
+        !rules.hasOneSymbol
+      ) {
+        this.errorMessage =
+          "Password must be at least 6 characters and contain 3 numbers, 3 capital letters, and 1 symbol";
         return;
       }
       if (this.password !== this.confirmPassword) {
@@ -205,11 +246,26 @@ input:focus {
   background: #25612b;
 }
 
-.field-hint {
-  display: block;
-  margin-top: 4px;
-  font-size: 0.78rem;
-  color: #4a7c59;
+.password-requirements {
+  list-style: none;
+  margin: 4px 0 0;
+  padding: 0;
+  display: grid;
+  gap: 4px;
+}
+
+.password-requirements li {
+  font-size: 0.82rem;
+  font-weight: 600;
+  transition: color 0.2s ease;
+}
+
+.req-met {
+  color: #2e7d32;
+}
+
+.req-unmet {
+  color: #b0bec5;
 }
 
 .error-message {

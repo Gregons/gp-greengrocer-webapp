@@ -25,6 +25,7 @@ export interface CatalogueItem {
   category: string;
   price: number;
   description: string;
+  origin: string;
   image: string;
 }
 
@@ -36,6 +37,7 @@ export const catalogueItems: CatalogueItem[] = [
     price: 1.8,
     description:
       "Crisp apples with a naturally sweet flavor for everyday snacking.",
+    origin: "New Zealand",
     image: appleImage,
   },
   {
@@ -44,6 +46,7 @@ export const catalogueItems: CatalogueItem[] = [
     category: "Fruit",
     price: 1.7,
     description: "Juicy pears with a mellow sweetness and a smooth bite.",
+    origin: "South Africa",
     image: pearImage,
   },
   {
@@ -53,6 +56,7 @@ export const catalogueItems: CatalogueItem[] = [
     price: 0.78,
     description:
       "Soft ripe bananas that are great for breakfast, baking, and smoothies.",
+    origin: "Ecuador",
     image: bananaImage,
   },
   {
@@ -61,6 +65,7 @@ export const catalogueItems: CatalogueItem[] = [
     category: "Fruit",
     price: 2.5,
     description: "Bright strawberries with a juicy texture and sweet finish.",
+    origin: "Spain",
     image: strawberryImage,
   },
   {
@@ -69,6 +74,7 @@ export const catalogueItems: CatalogueItem[] = [
     category: "Fruit",
     price: 2.1,
     description: "Fresh blueberries ideal for yogurt, cereal, or baking.",
+    origin: "Peru",
     image: blueberryImage,
   },
   {
@@ -77,6 +83,7 @@ export const catalogueItems: CatalogueItem[] = [
     category: "Fruit",
     price: 1.55,
     description: "Zesty oranges packed with juicy citrus flavor.",
+    origin: "Morocco",
     image: orangeImage,
   },
   {
@@ -86,6 +93,7 @@ export const catalogueItems: CatalogueItem[] = [
     price: 1.89,
     description:
       "Sweet pineapple with a tropical taste perfect for fruit bowls.",
+    origin: "Costa Rica",
     image: pineappleImage,
   },
   {
@@ -94,6 +102,7 @@ export const catalogueItems: CatalogueItem[] = [
     category: "Fruit",
     price: 2.8,
     description: "Sweet cherries with a bold, refreshing bite.",
+    origin: "Turkey",
     image: cherryImage,
   },
   {
@@ -102,6 +111,7 @@ export const catalogueItems: CatalogueItem[] = [
     category: "Fruit",
     price: 1.35,
     description: "Tangy kiwis with vibrant color and fresh flavor.",
+    origin: "Italy",
     image: kiwiImage,
   },
   {
@@ -110,6 +120,7 @@ export const catalogueItems: CatalogueItem[] = [
     category: "Vegetables",
     price: 1.25,
     description: "Hearty potatoes perfect for roasting, mashing, or frying.",
+    origin: "Egypt",
     image: potatoImage,
   },
   {
@@ -119,6 +130,7 @@ export const catalogueItems: CatalogueItem[] = [
     price: 0.69,
     description:
       "Crisp lettuce leaves that work well in salads and sandwiches.",
+    origin: "Netherlands",
     image: lettuceImage,
   },
   {
@@ -128,6 +140,7 @@ export const catalogueItems: CatalogueItem[] = [
     price: 0.85,
     description:
       "Earthy beetroot that is great for roasting and colorful side dishes.",
+    origin: "Poland",
     image: beetrootImage,
   },
   {
@@ -137,6 +150,7 @@ export const catalogueItems: CatalogueItem[] = [
     price: 0.45,
     description:
       "Aromatic garlic cloves for adding rich flavor to home cooking.",
+    origin: "China",
     image: garlicImage,
   },
   {
@@ -145,6 +159,7 @@ export const catalogueItems: CatalogueItem[] = [
     category: "Vegetables",
     price: 0.65,
     description: "Crunchy carrots with a clean, naturally sweet taste.",
+    origin: "France",
     image: carrotImage,
   },
   {
@@ -154,6 +169,7 @@ export const catalogueItems: CatalogueItem[] = [
     price: 1.09,
     description:
       "Savory mushrooms that are ideal for pasta, soups, and stir-fries.",
+    origin: "Netherlands",
     image: mushroomImage,
   },
   {
@@ -162,6 +178,7 @@ export const catalogueItems: CatalogueItem[] = [
     category: "Fruit",
     price: 1.55,
     description: "Fresh oranges with bright citrus taste for snacks or juice.",
+    origin: "South Africa",
     image: orangeImage,
   },
   {
@@ -171,6 +188,7 @@ export const catalogueItems: CatalogueItem[] = [
     price: 0.82,
     description:
       "Tender broccoli florets perfect for steaming and stir-frying.",
+    origin: "Spain",
     image: broccoliImage,
   },
   {
@@ -180,6 +198,7 @@ export const catalogueItems: CatalogueItem[] = [
     price: 1.5,
     description:
       "Rich pumpkin with a smooth texture for soups, roasting, and pies.",
+    origin: "Mexico",
     image: pumpkinImage,
   },
   {
@@ -188,6 +207,7 @@ export const catalogueItems: CatalogueItem[] = [
     category: "Vegetables",
     price: 0.95,
     description: "Flavorful onions that add depth to sauces, soups, and meals.",
+    origin: "Netherlands",
     image: onionImage,
   },
   {
@@ -197,6 +217,7 @@ export const catalogueItems: CatalogueItem[] = [
     price: 0.89,
     description:
       "Sweet corn with a fresh taste that pairs well with any side dish.",
+    origin: "United States",
     image: cornImage,
   },
 ];

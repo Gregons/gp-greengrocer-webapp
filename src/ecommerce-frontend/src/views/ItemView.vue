@@ -9,6 +9,9 @@
           <span class="item-category">{{ item.category }}</span>
           <h2>{{ item.name }}</h2>
           <p class="item-description">{{ item.description }}</p>
+          <p class="item-origin">
+            🌍 Imported from <strong>{{ item.origin }}</strong>
+          </p>
           <div class="item-price">£{{ item.price.toFixed(2) }}</div>
 
           <div class="quantity-row">
@@ -146,9 +149,15 @@ export default defineComponent({
 }
 
 .item-description {
-  margin: 0 0 22px;
+  margin: 0 0 10px;
   line-height: 1.8;
   color: #354f38;
+}
+
+.item-origin {
+  margin: 0 0 22px;
+  font-size: 0.95rem;
+  color: #5a7a5c;
 }
 
 .item-price {
