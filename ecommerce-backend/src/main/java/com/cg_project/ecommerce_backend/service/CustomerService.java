@@ -48,7 +48,7 @@ public class CustomerService {
     public LoginResponse login(LoginRequest request) {
         Customer customer = customerRepository.findByEmail(request.email())
                 .orElseThrow(() -> new ResponseStatusException(
-                        HttpStatus.UNAUTHORIZED, "Incorrect email or password"));
+                        HttpStatus.NOT_FOUND, "This account does not exist, please register"));
         if (!passwordEncoder.matches(request.password(), customer.getPassword())) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Incorrect email or password");
         }

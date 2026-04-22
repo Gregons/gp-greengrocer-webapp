@@ -3,7 +3,7 @@
     <section class="profile-panel">
       <div class="badge">My Profile</div>
       <h1>Your account details</h1>
-      <p>Review your login info, address, and payment details.</p>
+      <p>Review your login info, addresses, and payment methods.</p>
 
       <div class="details-group">
         <div class="detail-card">
@@ -17,27 +17,65 @@
         </div>
 
         <div class="detail-card">
-          <h2>Delivery address</h2>
-          <template v-if="addressInfo">
-            <p>{{ addressInfo.line1 }}</p>
-            <p v-if="addressInfo.line2">{{ addressInfo.line2 }}</p>
-            <p>{{ addressInfo.city }}, {{ addressInfo.postcode }}</p>
-            <p>{{ addressInfo.country }}</p>
+          <h2>Delivery addresses</h2>
+          <template v-if="addresses.length > 0">
+            <div v-for="(addr, idx) in addresses" :key="idx" class="saved-item">
+              <label class="radio-label">
+                <input
+                  type="radio"
+                  name="address-select"
+                  :value="idx"
+                  v-model="selectedAddressIndex"
+                />
+                <span class="saved-item__details">
+                  <span>{{ addr.line1 }}</span>
+                  <span v-if="addr.line2">{{ addr.line2 }}</span>
+                  <span>{{ addr.city }}, {{ addr.postcode }}</span>
+                  <span>{{ addr.country }}</span>
+                </span>
+              </label>
+              <button
+                class="remove-button"
+                type="button"
+                @click="removeAddress(idx)"
+              >
+                ✕
+              </button>
+            </div>
           </template>
-          <p v-else>No address saved yet.</p>
+          <p v-else>No addresses saved yet.</p>
         </div>
 
         <div class="detail-card">
-          <h2>Payment details</h2>
-          <template v-if="paymentInfo">
-            <p>{{ paymentInfo.cardHolder }}</p>
-            <p>
-              Card ending in
-              {{ paymentInfo.cardNumber.replace(/\s/g, "").slice(-4) }}
-            </p>
-            <p>Expires {{ paymentInfo.expiry }}</p>
+          <h2>Payment methods</h2>
+          <template v-if="payments.length > 0">
+            <div v-for="(pay, idx) in payments" :key="idx" class="saved-item">
+              <label class="radio-label">
+                <input
+                  type="radio"
+                  name="payment-select"
+                  :value="idx"
+                  v-model="selectedPaymentIndex"
+                />
+                <span class="saved-item__details">
+                  <span>{{ pay.cardHolder }}</span>
+                  <span>
+                    Card ending in
+                    {{ pay.cardNumber.replace(/\s/g, "").slice(-4) }}
+                  </span>
+                  <span>Expires {{ pay.expiry }}</span>
+                </span>
+              </label>
+              <button
+                class="remove-button"
+                type="button"
+                @click="removePayment(idx)"
+              >
+                ✕
+              </button>
+            </div>
           </template>
-          <p v-else>No payment details saved yet.</p>
+          <p v-else>No payment methods saved yet.</p>
         </div>
       </div>
 
@@ -49,16 +87,16 @@
           <button
             class="secondary-button"
             type="button"
-            @click="openManageAddress"
+            @click="openAddAddress"
           >
-            {{ addressInfo ? "Edit address" : "Add address" }}
+            Add address
           </button>
           <button
             class="secondary-button"
             type="button"
-            @click="openManagePayment"
+            @click="openAddPayment"
           >
-            Manage payment
+            Add payment
           </button>
           <button class="secondary-button" type="button" @click="goToPurchases">
             Purchases
@@ -101,14 +139,14 @@
       </div>
     </div>
 
-    <!-- Manage Address Modal -->
+    <!-- Add Address Modal -->
     <div
-      v-if="showManageAddress"
+      v-if="showAddAddress"
       class="modal-overlay"
-      @click.self="showManageAddress = false"
+      @click.self="showAddAddress = false"
     >
       <div class="modal">
-        <h2>{{ addressInfo ? "Edit address" : "Add address" }}</h2>
+        <h2>Add address</h2>
         <form @submit.prevent="saveAddress">
           <label>
             Address line 1
@@ -135,7 +173,7 @@
             <button
               class="secondary-button"
               type="button"
-              @click="showManageAddress = false"
+              @click="showAddAddress = false"
             >
               Cancel
             </button>
@@ -144,14 +182,14 @@
       </div>
     </div>
 
-    <!-- Manage Payment Modal -->
+    <!-- Add Payment Modal -->
     <div
-      v-if="showManagePayment"
+      v-if="showAddPayment"
       class="modal-overlay"
-      @click.self="showManagePayment = false"
+      @click.self="showAddPayment = false"
     >
       <div class="modal">
-        <h2>Manage Payment</h2>
+        <h2>Add payment method</h2>
         <form @submit.prevent="savePayment">
           <label>
             Cardholder name
@@ -182,7 +220,7 @@
             <button
               class="secondary-button"
               type="button"
-              @click="showManagePayment = false"
+              @click="showAddPayment = false"
             >
               Cancel
             </button>
@@ -212,30 +250,50 @@ interface AddressInfo {
   country: string;
 }
 
-function paymentKey(userId: number): string {
-  return `payment-info-${userId}`;
+function addressesKey(userId: number): string {
+  return `addresses-v2-${userId}`;
 }
 
-function loadPayment(userId: number): PaymentInfo | null {
+function selectedAddressKey(userId: number): string {
+  return `selected-address-${userId}`;
+}
+
+function loadAddresses(userId: number): AddressInfo[] {
   try {
-    const raw = localStorage.getItem(paymentKey(userId));
-    return raw ? (JSON.parse(raw) as PaymentInfo) : null;
+    const raw = localStorage.getItem(addressesKey(userId));
+    return raw ? (JSON.parse(raw) as AddressInfo[]) : [];
   } catch {
-    return null;
+    return [];
   }
 }
 
-function addressKey(userId: number): string {
-  return `address-info-${userId}`;
+function loadSelectedAddress(userId: number): number {
+  const raw = localStorage.getItem(selectedAddressKey(userId));
+  const idx = raw !== null ? parseInt(raw, 10) : 0;
+  return isNaN(idx) ? 0 : idx;
 }
 
-function loadAddress(userId: number): AddressInfo | null {
+function paymentsKey(userId: number): string {
+  return `payments-v2-${userId}`;
+}
+
+function selectedPaymentKey(userId: number): string {
+  return `selected-payment-${userId}`;
+}
+
+function loadPayments(userId: number): PaymentInfo[] {
   try {
-    const raw = localStorage.getItem(addressKey(userId));
-    return raw ? (JSON.parse(raw) as AddressInfo) : null;
+    const raw = localStorage.getItem(paymentsKey(userId));
+    return raw ? (JSON.parse(raw) as PaymentInfo[]) : [];
   } catch {
-    return null;
+    return [];
   }
+}
+
+function loadSelectedPayment(userId: number): number {
+  const raw = localStorage.getItem(selectedPaymentKey(userId));
+  const idx = raw !== null ? parseInt(raw, 10) : 0;
+  return isNaN(idx) ? 0 : idx;
 }
 
 export default defineComponent({
@@ -243,8 +301,8 @@ export default defineComponent({
   data() {
     return {
       showEditProfile: false,
-      showManagePayment: false,
-      showManageAddress: false,
+      showAddPayment: false,
+      showAddAddress: false,
       editName: "",
       editEmail: "",
       editCardHolder: "",
@@ -255,8 +313,10 @@ export default defineComponent({
       editCity: "",
       editPostcode: "",
       editCountry: "",
-      paymentInfo: null as PaymentInfo | null,
-      addressInfo: null as AddressInfo | null,
+      addresses: [] as AddressInfo[],
+      payments: [] as PaymentInfo[],
+      selectedAddressIndex: 0,
+      selectedPaymentIndex: 0,
     };
   },
   computed: {
@@ -264,11 +324,33 @@ export default defineComponent({
       return store.getters.currentUser;
     },
   },
+  watch: {
+    selectedAddressIndex(newVal: number) {
+      const user = store.getters.currentUser;
+      if (user) {
+        localStorage.setItem(selectedAddressKey(user.id), String(newVal));
+      }
+    },
+    selectedPaymentIndex(newVal: number) {
+      const user = store.getters.currentUser;
+      if (user) {
+        localStorage.setItem(selectedPaymentKey(user.id), String(newVal));
+      }
+    },
+  },
   created() {
     const user = store.getters.currentUser;
     if (user) {
-      this.addressInfo = loadAddress(user.id);
-      this.paymentInfo = loadPayment(user.id);
+      this.addresses = loadAddresses(user.id);
+      this.selectedAddressIndex = Math.min(
+        loadSelectedAddress(user.id),
+        Math.max(0, this.addresses.length - 1)
+      );
+      this.payments = loadPayments(user.id);
+      this.selectedPaymentIndex = Math.min(
+        loadSelectedPayment(user.id),
+        Math.max(0, this.payments.length - 1)
+      );
     }
   },
   methods: {
@@ -284,21 +366,13 @@ export default defineComponent({
       });
       this.showEditProfile = false;
     },
-    openManageAddress() {
-      if (this.addressInfo) {
-        this.editLine1 = this.addressInfo.line1;
-        this.editLine2 = this.addressInfo.line2;
-        this.editCity = this.addressInfo.city;
-        this.editPostcode = this.addressInfo.postcode;
-        this.editCountry = this.addressInfo.country;
-      } else {
-        this.editLine1 = "";
-        this.editLine2 = "";
-        this.editCity = "";
-        this.editPostcode = "";
-        this.editCountry = "";
-      }
-      this.showManageAddress = true;
+    openAddAddress() {
+      this.editLine1 = "";
+      this.editLine2 = "";
+      this.editCity = "";
+      this.editPostcode = "";
+      this.editCountry = "";
+      this.showAddAddress = true;
     },
     saveAddress() {
       const user = store.getters.currentUser;
@@ -310,21 +384,33 @@ export default defineComponent({
         postcode: this.editPostcode,
         country: this.editCountry,
       };
-      localStorage.setItem(addressKey(user.id), JSON.stringify(info));
-      this.addressInfo = info;
-      this.showManageAddress = false;
+      this.addresses.push(info);
+      localStorage.setItem(
+        addressesKey(user.id),
+        JSON.stringify(this.addresses)
+      );
+      this.selectedAddressIndex = this.addresses.length - 1;
+      this.showAddAddress = false;
     },
-    openManagePayment() {
-      if (this.paymentInfo) {
-        this.editCardHolder = this.paymentInfo.cardHolder;
-        this.editCardNumber = this.paymentInfo.cardNumber;
-        this.editExpiry = this.paymentInfo.expiry;
-      } else {
-        this.editCardHolder = "";
-        this.editCardNumber = "";
-        this.editExpiry = "";
+    removeAddress(idx: number) {
+      const user = store.getters.currentUser;
+      if (!user) return;
+      this.addresses.splice(idx, 1);
+      localStorage.setItem(
+        addressesKey(user.id),
+        JSON.stringify(this.addresses)
+      );
+      if (this.addresses.length === 0) {
+        this.selectedAddressIndex = 0;
+      } else if (this.selectedAddressIndex >= this.addresses.length) {
+        this.selectedAddressIndex = this.addresses.length - 1;
       }
-      this.showManagePayment = true;
+    },
+    openAddPayment() {
+      this.editCardHolder = "";
+      this.editCardNumber = "";
+      this.editExpiry = "";
+      this.showAddPayment = true;
     },
     savePayment() {
       const user = store.getters.currentUser;
@@ -334,9 +420,21 @@ export default defineComponent({
         cardNumber: this.editCardNumber,
         expiry: this.editExpiry,
       };
-      localStorage.setItem(paymentKey(user.id), JSON.stringify(info));
-      this.paymentInfo = info;
-      this.showManagePayment = false;
+      this.payments.push(info);
+      localStorage.setItem(paymentsKey(user.id), JSON.stringify(this.payments));
+      this.selectedPaymentIndex = this.payments.length - 1;
+      this.showAddPayment = false;
+    },
+    removePayment(idx: number) {
+      const user = store.getters.currentUser;
+      if (!user) return;
+      this.payments.splice(idx, 1);
+      localStorage.setItem(paymentsKey(user.id), JSON.stringify(this.payments));
+      if (this.payments.length === 0) {
+        this.selectedPaymentIndex = 0;
+      } else if (this.selectedPaymentIndex >= this.payments.length) {
+        this.selectedPaymentIndex = this.payments.length - 1;
+      }
     },
     goToPurchases() {
       router.push({ name: "purchases" });
@@ -536,5 +634,62 @@ p {
   display: flex;
   gap: 12px;
   margin-top: 24px;
+}
+
+/* ── Saved item list (addresses / payment methods) ───────────────────────── */
+
+.saved-item {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 0;
+  border-bottom: 1px solid rgba(46, 125, 50, 0.1);
+}
+
+.saved-item:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.radio-label {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  cursor: pointer;
+  flex: 1;
+}
+
+.radio-label input[type="radio"] {
+  margin-top: 3px;
+  accent-color: #2e7d32;
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.saved-item__details {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  color: #2f5132;
+  font-size: 0.95rem;
+}
+
+.remove-button {
+  background: none;
+  border: none;
+  color: #d32f2f;
+  cursor: pointer;
+  font-size: 0.85rem;
+  padding: 2px 8px;
+  border-radius: 8px;
+  transition: background 0.15s;
+  flex-shrink: 0;
+}
+
+.remove-button:hover {
+  background: #fdecea;
 }
 </style>

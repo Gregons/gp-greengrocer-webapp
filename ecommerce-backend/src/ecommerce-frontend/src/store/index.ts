@@ -20,10 +20,36 @@ export interface Purchase {
   total: number;
 }
 
+export interface CheckoutDetails {
+  recipientName: string;
+  addressLine1: string;
+  addressLine2: string;
+  city: string;
+  postcode: string;
+  country: string;
+  billingAddressSame: boolean;
+  billingAddressLine1: string;
+  billingAddressLine2: string;
+  billingCity: string;
+  billingPostcode: string;
+  billingCountry: string;
+  shippingMethod: "first" | "second";
+  paymentCardHolder: string;
+  paymentCardNumber: string;
+  paymentCardExpiry: string;
+}
+
+export interface SuccessfulOrder {
+  purchase: Purchase;
+  shippingMethod: "first" | "second";
+}
+
 interface RootState {
   cartItems: CartEntry[];
   purchases: Purchase[];
   currentUser: UserInfo | null;
+  checkoutDetails: CheckoutDetails | null;
+  successfulOrder: SuccessfulOrder | null;
 }
 
 function loadUser(): UserInfo | null {
@@ -40,6 +66,8 @@ export default createStore<RootState>({
     cartItems: [],
     purchases: [],
     currentUser: loadUser(),
+    checkoutDetails: null,
+    successfulOrder: null,
   },
   getters: {
     cartItems(state) {
@@ -60,6 +88,12 @@ export default createStore<RootState>({
     },
     totalCartCount(state) {
       return state.cartItems.reduce((sum, entry) => sum + entry.quantity, 0);
+    },
+    checkoutDetails(state) {
+      return state.checkoutDetails;
+    },
+    successfulOrder(state) {
+      return state.successfulOrder;
     },
   },
   mutations: {
@@ -103,6 +137,12 @@ export default createStore<RootState>({
       state.purchases = [];
       localStorage.removeItem("session-token");
       localStorage.removeItem("user-info");
+    },
+    SET_CHECKOUT_DETAILS(state, details: CheckoutDetails) {
+      state.checkoutDetails = details;
+    },
+    SET_SUCCESSFUL_ORDER(state, order: SuccessfulOrder) {
+      state.successfulOrder = order;
     },
   },
   actions: {},

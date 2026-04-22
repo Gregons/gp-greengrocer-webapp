@@ -72,6 +72,7 @@ export async function loginUser(payload: {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(payload),
   });
+  if (res.status === 404) throw new Error("This account does not exist, please register");
   if (res.status === 401) throw new Error("Incorrect email or password");
   if (!res.ok) await handleError(res, "Login failed. Please try again.");
   return res.json();

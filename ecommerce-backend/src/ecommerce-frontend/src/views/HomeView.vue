@@ -51,7 +51,7 @@
           >
             −
           </button>
-          <div class="quantity-count">{{ cartCount(item.id) }}</div>
+          <div class="quantity-count">{{ localQuantity(item.id) }}</div>
           <button
             class="quantity-button"
             type="button"
@@ -80,11 +80,12 @@ export default defineComponent({
     return {
       items: catalogueItems as CatalogueItem[],
       activeFilter: "All",
+      pendingQuantities: {} as Record<number, number>,
     };
   },
   computed: {
-    cartCount() {
-      return (itemId: number) => store.getters.cartCount(itemId);
+    localQuantity() {
+      return (itemId: number) => this.pendingQuantities[itemId] ?? 1;
     },
     visibleItems(): CatalogueItem[] {
       if (this.activeFilter === "All") {
@@ -95,25 +96,26 @@ export default defineComponent({
   },
   methods: {
     incrementQuantity(itemId: number) {
-      const current = store.getters.cartCount(itemId);
-      store.commit("SET_CART_QUANTITY", {
-        id: itemId,
-        quantity: current + 1,
-      });
+      const current = this.pendingQuantities[itemId] ?? 1;
+      this.pendingQuantities = {
+        ...this.pendingQuantities,
+        [itemId]: current + 1,
+      };
     },
     decrementQuantity(itemId: number) {
-      const current = store.getters.cartCount(itemId);
-      store.commit("SET_CART_QUANTITY", {
-        id: itemId,
-        quantity: Math.max(current - 1, 0),
-      });
+      const current = this.pendingQuantities[itemId] ?? 1;
+      this.pendingQuantities = {
+        ...this.pendingQuantities,
+        [itemId]: Math.max(current - 1, 1),
+      };
     },
     addToCart(item: CatalogueItem) {
-      const current = store.getters.cartCount(item.id);
+      const qty = this.pendingQuantities[item.id] ?? 1;
       store.commit("SET_CART_QUANTITY", {
         id: item.id,
-        quantity: current > 0 ? current : 1,
+        quantity: qty,
       });
+      this.pendingQuantities = { ...this.pendingQuantities, [item.id]: 1 };
     },
   },
 });

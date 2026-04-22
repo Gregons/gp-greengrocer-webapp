@@ -43,14 +43,18 @@
         <div class="subtotal">Total: £{{ subtotal.toFixed(2) }}</div>
         <div class="checkout-right">
           <p v-if="checkoutError" class="checkout-error">{{ checkoutError }}</p>
-          <button
-            class="checkout-button"
-            type="button"
-            :disabled="checkoutLoading"
-            @click="handleCheckout"
-          >
-            {{ checkoutLoading ? "Placing order…" : "Checkout" }}
-          </button>
+          <div class="buttons-row">
+            <router-link class="continue-button" to="/">
+              Continue Shopping
+            </router-link>
+            <button
+              class="checkout-button"
+              type="button"
+              @click="goToReviewAndPay"
+            >
+              Review and Pay
+            </button>
+          </div>
         </div>
       </div>
     </section>
@@ -59,11 +63,8 @@
 
 <script lang="ts">
 import { defineComponent } from "vue";
-import router from "@/router";
 import store from "@/store";
-import type { Purchase } from "@/store";
 import { catalogueItems, CatalogueItem } from "@/data/catalogue";
-import { placeOrder } from "@/api";
 
 interface CartProduct extends CatalogueItem {
   quantity: number;
@@ -74,7 +75,6 @@ export default defineComponent({
   data() {
     return {
       checkoutError: "",
-      checkoutLoading: false,
     };
   },
   computed: {
@@ -122,44 +122,13 @@ export default defineComponent({
         quantity: 0,
       });
     },
-    async handleCheckout() {
+    goToReviewAndPay() {
       if (!this.cartDetails.length) return;
-      this.checkoutError = "";
       if (!store.getters.isLoggedIn) {
         this.checkoutError = "Please log in before checking out";
         return;
       }
-      this.checkoutLoading = true;
-      try {
-        const saved = await placeOrder({
-          items: this.cartDetails.map((item) => ({
-            id: item.id,
-            name: item.name,
-            price: item.price,
-            quantity: item.quantity,
-          })),
-          total: this.subtotal,
-        });
-        // Mirror into Vuex so purchases page updates instantly
-        const purchase: Purchase = {
-          orderId: saved.orderId,
-          date: saved.date,
-          items: saved.items.map((i) => ({
-            id: i.id,
-            name: i.name,
-            price: i.price,
-            quantity: i.quantity,
-          })),
-          total: saved.total,
-        };
-        store.commit("ADD_PURCHASE", purchase);
-        store.commit("CLEAR_CART");
-        router.push({ name: "purchases" });
-      } catch (e: unknown) {
-        this.checkoutError = e instanceof Error ? e.message : "Checkout failed";
-      } finally {
-        this.checkoutLoading = false;
-      }
+      this.$router.push({ name: "review-and-pay" });
     },
   },
 });
@@ -342,6 +311,25 @@ p {
   color: #1f3b20;
 }
 
+.continue-button {
+  padding: 14px 24px;
+  border-radius: 999px;
+  background: #f0f7ef;
+  color: #2e7d32;
+  font-weight: 700;
+  border: 1px solid rgba(46, 125, 50, 0.25);
+  cursor: pointer;
+  text-decoration: none;
+  transition: background 0.2s ease, transform 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+}
+
+.continue-button:hover {
+  background: #e8f3e6;
+  transform: translateY(-1px);
+}
+
 .checkout-button {
   padding: 14px 24px;
   border-radius: 999px;
@@ -363,6 +351,12 @@ p {
   flex-direction: column;
   align-items: flex-end;
   gap: 10px;
+}
+
+.buttons-row {
+  display: flex;
+  gap: 12px;
+  align-items: center;
 }
 
 .checkout-error {
