@@ -1,4 +1,5 @@
-INSTRUCTIONS
+INSTRUCTIONS:
+
 step 1 open new terminal, find file path to frontend: cd ecommerce-backend\src\ecommerce-frontend
 
 step 2 run frontend: npm run serve
